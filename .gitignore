@@ -1,0 +1,6 @@
+node_modules/
+*.log
+*.bib
+*.txt
+*.doc
+*.pdf

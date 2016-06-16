@@ -10,11 +10,11 @@ function isSameUser(req, res, next) {
     if (req.user._id == req.params.id) {
       next();
     } else {
-      req.sendStatus(403);
+      res.send(403, 'Access denied!');
     }
     
   } else {
-    res.sendStatus(401);
+    res.send(401, 'Unauthorize!');
     //console.log(req.params.uid);
     //next();
   }
@@ -38,11 +38,11 @@ router.get('/:id', isSameUser, function(req, res, next) {
   console.log(req.params);
  // console.log('called route /users/:id for GET' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);
   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /users for GET by user ' + req.params.id + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
-  User.find({_id : req.params.id}, function(err, users){
+  User.findOne({_id : req.params.id}, function(err, user){
     if (err) {
       next(err);
     } else {
-      res.send(users);
+      res.send(user);
     }
   });
 });

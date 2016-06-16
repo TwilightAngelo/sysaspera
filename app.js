@@ -10,7 +10,6 @@ var myStrategy = require(__base + '/config/passport.js');
 var morgan = require('morgan');
 var fs = require('fs');
 
-
 mongoose.connect(config.mongoConnectionString);
 mongoose.connection.on('error', () => {
   console.log('Connection error');
@@ -20,6 +19,8 @@ mongoose.connection.once('open', (callback) => {
 });
 
 var logStream = fs.createWriteStream(__base + '/logfile.log', {flags : 'a'})
+
+app.use('/uploads/', express.static('./uploads'));
 
 app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded());
@@ -39,7 +40,8 @@ function isLoggedIn(req, res, next) {
 		//console.log(req.params.uid);
 		next();
 	} else {
-		res.sendStatus(401);
+		// res.sendStatus(401);
+		next();
 		//console.log(req.params.uid);
 	}
 }

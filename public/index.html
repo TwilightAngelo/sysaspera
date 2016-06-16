@@ -12,9 +12,8 @@
   <h1>/users/:id (get - конкретный пользователь, put - изменить пользователя, delete - удалить пользователя)</h1>
   <h1>/users/:id/docs (get - все документы, post - добавить документ)</h1>
   <h1>/users/:id/docs/:id (get - конкретный документ, put - изменить документ, delete - удалить конкретный документы)</h1>
-  <form action="/auth/login" method=post>
-  <input name="username">
-  <input name="password">
+  <form action="/users/1/docs/1/upload" method=post enctype="multipart/form-data">
+  <input type=file name="attachment">
   <input type=submit>
   </form>
   </body>

@@ -3,12 +3,16 @@ var router = express.Router( { mergeParams : true } );
 var User = require( __base + 'models/user.js' );
 var fs = require( 'fs' );
 var crypto = require( 'crypto' );
-var chai = require( 'chai' );
 
-function isLoggedIn(req, res, next) {
-  if(req.user) {
+function isSameUser(req, res, next) {
+  if (req.user) {
     //console.log(req.params.uid);
-    next();
+    if (req.user._id == req.params.id) {
+      next();
+    } else {
+      req.sendStatus(403);
+    }
+    
   } else {
     res.sendStatus(401);
     //console.log(req.params.uid);
@@ -16,20 +20,20 @@ function isLoggedIn(req, res, next) {
   }
 }
 
-router.get('/', isLoggedIn, function(req, res, next) {
-  var date = new Date();
-  console.log('called route /users for GET' + '\n' + 'date is: ' + date +'/n' + 'with ip = ' + req.ip);
-  fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /users for GET ' + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
-  User.find(req.query, function(err, users){
-    if (err) {
-      next(err);
-    } else {
-      res.send(users);
-    }
-  });
-});
+// router.get('/', isLoggedIn, function(req, res, next) {
+//   var date = new Date();
+//   console.log('called route /users for GET' + '\n' + 'date is: ' + date +'/n' + 'with ip = ' + req.ip);
+//   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /users for GET ' + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
+//   User.find(req.query, function(err, users){
+//     if (err) {
+//       next(err);
+//     } else {
+//       res.send(users);
+//     }
+//   });
+// });
 
-router.get('/:id', isLoggedIn, function(req, res, next) {
+router.get('/:id', isSameUser, function(req, res, next) {
   var date = new Date();
   console.log(req.params);
  // console.log('called route /users/:id for GET' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);
@@ -63,7 +67,7 @@ router.post('/', function(req,res, next) {
   });
 });
 
-router.delete('/:id', isLoggedIn, function(req, res, next) {
+router.delete('/:id', isSameUser, function(req, res, next) {
   var date = new Date();
   //console.log('called route /users/:id for DELETE' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);
   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /users for DELETE ' + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
@@ -76,7 +80,7 @@ router.delete('/:id', isLoggedIn, function(req, res, next) {
   });
 });
 
-router.put('/:id', isLoggedIn, function(req, res, next) {
+router.put('/:id', isSameUser, function(req, res, next) {
   var date = new Date();
   //console.log('called route /users/:id for PUT' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);
   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /users for UPDATE by user ' + req.params.id + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});

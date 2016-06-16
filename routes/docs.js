@@ -5,14 +5,21 @@ var Doc = require(__base + 'models/doc.js');
 var crypto = require('crypto');
 var fs = require('fs');
 
-/*var storage = multer.diskStorage({
+var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './upload/' + req.params.uid)
+    var dir = './uploads/' + req.params.uid;
+    if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir);
+      console.log('Not exists. Creating directiory');
+    }
+
+    cb(null, dir);
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now())
+    console.log(file.fieldname + '-' + Date.now());
+    cb(null, file.fieldname + '-' + Date.now());
   }
-})*/
+})
 
 router.get('/', function(req, res, next) {
   var date = new Date();
@@ -167,22 +174,11 @@ router.get('/:did/bibtex', function(req, res, next) {
       };
     }
 
-    
-
-    //res.sendFile(meta[0]._id + '.bib', {root : global.__base}, function(err) {} );
-    //var stat;
-    //res.setHeader('Book', __base + 'test.bib', stat);
-    //onsole.log(stat);
-    //res.download('C:\dplm\test.bib');
-
-
-//
-
   });
 });
 
-//router.post('/:did/upload', multer({ storage: storage }).single('file'), function(req, res, next)  {
-//  console.log('Sucsess!');
-//});
+router.post('/:did/upload', multer({ storage: storage }).single('attachment'), function(req, res, next)  {
+  res.send(req.file);
+});
 
 module.exports = router;

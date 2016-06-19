@@ -25,17 +25,12 @@ var storage = multer.diskStorage({
 
 router.get('/', function(req, res, next) {
   var date = new Date();
-  //console.log(req.params.uid);
-  //console.log('called route /docs for GET' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);
   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /docs for GET by user ' + req.params.uid + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
   Doc.find({postedBy : req.params.uid}, function(err, docs){
-    //console.log(req.query);
-    //console.log(docs);
     if (err) {
       next(err);
     } else {
-      res.send(docs);   
-      console.log(docs);                                                                               
+      res.send(docs);                                                                             
     }
   });
 });
@@ -120,14 +115,11 @@ router.get('/:did/bibtex', function(req, res, next) {
       res.send(404, 'User or document not found');
       next(err);
     } else {
-      var meta = docs;
-      console.log(docs);
-      //res.send(docs);                                                                                
+      var meta = docs;                                                                         
     }
     console.log(meta[0]);
     switch(meta[0].type) {
       case 'book' : {
-        console.log('upstream');
         fs.writeFile(meta[0]._id + '.bib', 
         '@BOOK{' + meta[0].title + ':' + meta[0]._id + ',\r\n' +
           'author = {' + meta[0].creator + '}, \r\n' +
@@ -140,7 +132,6 @@ router.get('/:did/bibtex', function(req, res, next) {
           if(err) {
             res.sendStatus(500);
           } else {
-            console.log('upload!');
             res.sendFile(meta[0]._id + '.bib', {root : global.__base}, function(err) {} );
           }
         });  
@@ -158,9 +149,9 @@ router.get('/:did/bibtex', function(req, res, next) {
         '}'
         , function(err) {
           if (err) {
-            res.sendFile(meta[0]._id + '.bib', {root : global.__base}, function(err) {} );
-          } else {
             res.sendStatus(500);
+          } else {
+            res.sendFile(meta[0]._id + '.bib', {root : global.__base}, function(err) {} );
           }
         });
       };
@@ -177,18 +168,34 @@ router.get('/:did/bibtex', function(req, res, next) {
           '}'
           , function(err){
             if (err) {
-              res.sendFile(meta[0]._id + '.bib', {root : global.__base}, function(err) {} );
-            } else {
               res.sendStatus(500);
+            } else {
+              res.sendFile(meta[0]._id + '.bib', {root : global.__base}, function(err) {} );
             }
           });
       };
       break;
       case 'misc' : {
-
+        fs.writeFile(meta[0]._id + '.bib',
+          '@MISC{' + meta[0].title + ':' + meta[0]._id + ',\r\n' +
+            'title = {' + meta[0].title + '},\r\n' +
+            'author = {' + meta[0].creator + '},\r\n' +
+            'coverage = {' + meta[0].coverage + '},\r\n' +
+            'month = {' + meta[0].date.getMonth() + '},\r\n' +
+            'year = {' + meta[0].date.getFullYear() + '},\r\n' +
+            'note = {' + meta[0].description + '},\r\n' +
+          '}'
+          , function(err){
+            if (err) {
+              res.sendStatus(500);
+            } else {
+              res.sendFile(meta[0]._id + '.bib', {root : global.__base}, function(err) {} );
+            }
+          });
+      };
+      break;        
       };
     }
-
   });
 });
 
@@ -203,23 +210,25 @@ router.get('/:did/pdf', function(req, res, next) {
       res.send(404, 'User or document not found');
       next(err);
     } else {
+      
       var meta = docs;
       console.log(docs);
       //res.send(docs);   
 
-      doc.pipe(fs.createWriteStream(global.__base + 'uploads/' + req.params.did + '.pdf', {},function(){}));
+      var stream = doc.pipe(fs.createWriteStream(global.__base + 'uploads/' + req.params.did + '.pdf'));
+
+      stream.on('finish', function() {
+        res.redirect('/uploads/' + req.params.did + '.pdf');        
+      })
+
       var textPdf = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear();
       doc.font(global.__base + 'fonts/times.ttf');
       doc.fontSize(14);
       doc.text(textPdf);
-      //doc.pipe(res);    
-      doc.end();
-                                                                
+      doc.end();                          
     }
   });
 
-res.redirect('/uploads/' + req.params.did + '.pdf');
-  
 });
 
 router.get('/:did/docx', function(req, res, next) {
@@ -235,20 +244,27 @@ router.get('/:did/docx', function(req, res, next) {
     } else {
       var meta = docs;
       console.log(docs);
-      //res.send(docs);   
-      var textPdf = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear;     
+     
       var docx = officegen('docx');
+
+      var textDoc = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear();     
+      
       docx.setDocTitle(req.params.did + '.docx'); 
 
       var object = docx.createP();
       object.options.align = 'jestify';
-      object.addText(textPdf, {font_face : 'Times New Roman', font_size : 14});
+      object.addText(textDoc, {font_face : 'Times New Roman', font_size : 14});
 
-      var supdoc = fs.createWriteStream(global.__base + 'uploads/' + req.params.did + '.docx');
-      docx.generate(supdoc, function() {});
+      var stream = fs.createWriteStream(global.__base + 'uploads/' + req.params.did + '.docx');
+      docx.generate(stream, function() {});
+
+      stream.on('finish', function(){
+        console.log('here');
+        res.redirect('/uploads/' + req.params.did + '.docx');
+      });    
     }
   });
-  res.redirect('/uploads/' + req.params.did + '.docx');
+  
 });
 
 router.post('/:did/upload', multer({ storage: storage }).single('attachment'), function(req, res, next)  {

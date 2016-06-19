@@ -89,7 +89,7 @@ router.put('/:did', function(req, res, next) {
   var date = new Date();
   //console.log('called route /users/:id for PUT' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);
   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /docs for UPDATE by user ' + req.params.uid + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
-  Doc.update({_id: req.params.did}, {postedBy: req.params.uid,
+  Doc.update({_id: req.params.did}, { $set : {postedBy: req.params.uid,
     title: req.body.title,
     creator: req.body.creator,
     subject: req.body.subject,
@@ -103,7 +103,7 @@ router.put('/:did', function(req, res, next) {
     language: req.body.language,
     relation: req.body.relation,
     coverage: req.body.coverage,
-    rights: req.body.rights,}, function(err) { 
+    rights: req.body.rights,}}, function(err) { 
     if (err) {
       next(err);
     } else {

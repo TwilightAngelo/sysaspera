@@ -194,8 +194,7 @@ router.get('/:did/bibtex', function(req, res, next) {
           });
       };
       break;        
-      };
-    }
+    };
   });
 });
 

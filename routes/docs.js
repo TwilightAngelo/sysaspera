@@ -35,6 +35,18 @@ router.get('/', function(req, res, next) {
   });
 });
 
+router.get('/:did', function(req, res, next) {
+  var date = new Date();
+  fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /docs for GET by user ' + req.params.uid + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
+  Doc.deleteOne({postedBy : req.params.uid}, function(err, docs){
+    if (err) {
+      next(err);
+    } else {
+      res.send(200, 'Sucsess');                                                                             
+    }
+  });
+});
+
 router.post('/', function(req,res, next) {
   var date = new Date();
   //console.log('called route /docs for POST' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);

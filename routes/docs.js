@@ -38,7 +38,7 @@ router.get('/', function(req, res, next) {
 router.delete('/:did', function(req, res, next) {
   var date = new Date();
   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /docs for GET by user ' + req.params.uid + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
-  Doc.remove({postedBy : req.params.uid}, function(err, docs){
+  Doc.remove({_id : req.params.did}, function(err, docs){
     if (err) {
       next(err);
     } else {

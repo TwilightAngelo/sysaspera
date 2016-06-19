@@ -232,7 +232,7 @@ router.get('/:did/pdf', function(req, res, next) {
         res.redirect('/uploads/' + req.params.did + '.pdf');        
       })
 
-      var textPdf = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear();
+      var textPdf = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear() + '[' + meta[0].source + ']';
       doc.font(global.__base + 'fonts/times.ttf');
       doc.fontSize(14);
       doc.text(textPdf);
@@ -258,7 +258,7 @@ router.get('/:did/docx', function(req, res, next) {
      
       var docx = officegen('docx');
 
-      var textDoc = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear();     
+      var textDoc = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear() + '[' + meta[0].source + ']';     
       
       docx.setDocTitle(req.params.did + '.docx'); 
 

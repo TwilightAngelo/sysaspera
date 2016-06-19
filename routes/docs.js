@@ -75,6 +75,7 @@ router.get('/:did', function(req, res, next) {
   var date = new Date();
   //console.log('called route /docs/:id for GET' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);
   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /docs for GET by user ' + req.params.uid + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
+  
   Doc.find( {_id : req.params.did, postedBy : req.params.uid }, function(err, docs){
     if (err) {
       next(err);
@@ -88,7 +89,21 @@ router.put('/:did', function(req, res, next) {
   var date = new Date();
   //console.log('called route /users/:id for PUT' + '\n' + 'date is: ' + date +'\n' + 'with ip = ' + req.ip);
   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /docs for UPDATE by user ' + req.params.uid + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
-  Doc.update({_id: req.params.did}, {$set: req.body}, function(err) { 
+  Doc.update({_id: req.params.did}, {postedBy: req.params.uid,
+    title: req.body.title,
+    creator: req.body.creator,
+    subject: req.body.subject,
+    description: req.body.description,
+    publisher: req.body.publisher,
+    contributor: req.body.contributor,
+    date: req.body.date,
+    type: req.body.type,
+    format: req.body.format,
+    source: req.body.source,
+    language: req.body.language,
+    relation: req.body.relation,
+    coverage: req.body.coverage,
+    rights: req.body.rights,}, function(err) { 
     if (err) {
       next(err);
     } else {
@@ -192,8 +207,8 @@ router.get('/:did/pdf', function(req, res, next) {
       console.log(docs);
       //res.send(docs);   
 
-      doc.pipe(fs.createWriteStream(global.__base + 'uploads/test.pdf', {},function(){}));
-      var textPdf = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].year;
+      doc.pipe(fs.createWriteStream(global.__base + 'uploads/' + req.params.did + '.pdf', {},function(){}));
+      var textPdf = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear();
       doc.font(global.__base + 'fonts/times.ttf');
       doc.fontSize(14);
       doc.text(textPdf);
@@ -203,8 +218,8 @@ router.get('/:did/pdf', function(req, res, next) {
     }
   });
 
-
-  res.redirect('/uploads/test.pdf');
+res.redirect('/uploads/' + req.params.did + '.pdf');
+  
 });
 
 router.get('/:did/docx', function(req, res, next) {
@@ -227,14 +242,13 @@ router.get('/:did/docx', function(req, res, next) {
 
       var object = docx.createP();
       object.options.align = 'jestify';
-      object.addText(textPdf, {font_face : 'Times New Roman', font_size : 30});
+      object.addText(textPdf, {font_face : 'Times New Roman', font_size : 14});
 
-      var supdoc = fs.createWriteStream(global.__base + 'uploads/test.docx');
-      docx.generate(supdoc, function() {next();});
-
+      var supdoc = fs.createWriteStream(global.__base + 'uploads/' + req.params.did + '.docx');
+      docx.generate(supdoc, function() {});
     }
   });
-  res.redirect('/uploads/test.docx')
+  res.redirect('/uploads/' + req.params.did + '.docx');
 });
 
 router.post('/:did/upload', multer({ storage: storage }).single('attachment'), function(req, res, next)  {

@@ -46,11 +46,11 @@ var DocSchema = new Schema({
     required: false,
     unique: false,
   },
-  format: { //формат документа
-    type: String,
-    required: true,
-    unique: false,
-  },
+//  format: { //формат документа
+//    type: String,
+//    required: true,
+//    unique: false,
+//  },
 //  identifier: { //идентификатор
 //    type: String,
 //    required: false,

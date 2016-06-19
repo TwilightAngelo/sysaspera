@@ -82,6 +82,6 @@ var DocSchema = new Schema({
     unique: false,
   }
 
-;
+});
 
 module.exports = mongoose.model('Doc', DocSchema, 'docs');

@@ -42,7 +42,7 @@ router.delete('/:did', function(req, res, next) {
     if (err) {
       next(err);
     } else {
-      res.send(200, 'Sucsess');                                                                             
+      res.sendStatus(200);                                                                             
     }
   });
 });
@@ -279,6 +279,7 @@ router.get('/:did/docx', function(req, res, next) {
 });
 
 router.post('/:did/upload', multer({ storage: storage }).single('attachment'), function(req, res, next)  {
+  console.log(req.file);
   res.send(req.file);
 });
 

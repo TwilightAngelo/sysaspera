@@ -20,15 +20,12 @@ module.exports = function(passport) {
 
   passport.use(new LocalStrategy(
     function(username, password, done) {
-      console.log('HUI');
       User.findOne({ username: username }, function (err, user) {
-        console.log('HUI');
         if (err) { return done(err); }
         if (!user) { return done(null, false); }
         if (!password) { return done(null, false); }
         if (user.username == user.google.email) { return done(null, false); }
         if (!user.verifyPassword(crypto.createHash('md5').update(password).digest("hex"))) { return done(null, false); } 
-          console.log('au!!');
         return done(null, user);
       });
     }

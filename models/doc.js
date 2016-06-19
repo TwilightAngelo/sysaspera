@@ -80,7 +80,7 @@ var DocSchema = new Schema({
     type: String,
     required: false,
     unique: false,
-  },
+  }
 
 ;
 

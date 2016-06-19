@@ -1,9 +1,11 @@
 var express = require('express');
 var router = express.Router({mergeParams : true});
 var multer = require('multer');
+var PDFdocument = require ('pdfkit');
 var Doc = require(__base + 'models/doc.js');
 var crypto = require('crypto');
 var fs = require('fs');
+var officegen = require('officegen');
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -67,7 +69,6 @@ router.post('/', function(req,res, next) {
       res.send(doc);
     }
   });
-
 });
 
 router.get('/:did', function(req, res, next) {
@@ -81,7 +82,6 @@ router.get('/:did', function(req, res, next) {
       res.send(docs);
     }
   });
-
 });
 
 router.put('/:did', function(req, res, next) {
@@ -114,7 +114,7 @@ router.get('/:did/bibtex', function(req, res, next) {
       case 'book' : {
         console.log('upstream');
         fs.writeFile(meta[0]._id + '.bib', 
-        '@Book{' + meta[0].title + ':' + meta[0]._id + ',\r\n' +
+        '@BOOK{' + meta[0].title + ':' + meta[0]._id + ',\r\n' +
           'author = {' + meta[0].creator + '}, \r\n' +
           'title = {' + meta[0].title + '},\r\n' +
           'publisher = {' + meta[0].publisher + '},\r\n' +
@@ -175,6 +175,66 @@ router.get('/:did/bibtex', function(req, res, next) {
     }
 
   });
+});
+
+router.get('/:did/pdf', function(req, res, next) {
+  var date = new Date();
+  var doc = new PDFdocument;
+  
+  fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /bibtex by user ' + req.params.uid + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
+
+  Doc.find({_id : req.params.did, postedBy : req.params.uid}, function(err, docs){
+    if (err) {
+      res.send(404, 'User or document not found');
+      next(err);
+    } else {
+      var meta = docs;
+      console.log(docs);
+      //res.send(docs);   
+
+      doc.pipe(fs.createWriteStream(global.__base + 'uploads/test.pdf', {},function(){}));
+      var textPdf = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].year;
+      doc.font(global.__base + 'fonts/times.ttf');
+      doc.fontSize(14);
+      doc.text(textPdf);
+      //doc.pipe(res);    
+      doc.end();
+                                                                
+    }
+  });
+
+
+  res.redirect('/uploads/test.pdf');
+});
+
+router.get('/:did/docx', function(req, res, next) {
+  var date = new Date();
+  var doc = new PDFdocument;
+  
+  fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /bibtex by user ' + req.params.uid + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
+
+  Doc.find({_id : req.params.did, postedBy : req.params.uid}, function(err, docs){
+    if (err) {
+      res.send(404, 'User or document not found');
+      next(err);
+    } else {
+      var meta = docs;
+      console.log(docs);
+      //res.send(docs);   
+      var textPdf = meta[0].creator + ', ' + meta[0].title + ', ' + meta[0].publisher + ', ' + meta[0].date.getFullYear;     
+      var docx = officegen('docx');
+      docx.setDocTitle(req.params.did + '.docx'); 
+
+      var object = docx.createP();
+      object.options.align = 'jestify';
+      object.addText(textPdf, {font_face : 'Times New Roman', font_size : 30});
+
+      var supdoc = fs.createWriteStream(global.__base + 'uploads/test.docx');
+      docx.generate(supdoc, function() {next();});
+
+    }
+  });
+  res.redirect('/uploads/test.docx')
 });
 
 router.post('/:did/upload', multer({ storage: storage }).single('attachment'), function(req, res, next)  {

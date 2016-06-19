@@ -20,18 +20,18 @@ function isSameUser(req, res, next) {
   }
 }
 
-// router.get('/', isLoggedIn, function(req, res, next) {
-//   var date = new Date();
-//   console.log('called route /users for GET' + '\n' + 'date is: ' + date +'/n' + 'with ip = ' + req.ip);
-//   fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /users for GET ' + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
-//   User.find(req.query, function(err, users){
-//     if (err) {
-//       next(err);
-//     } else {
-//       res.send(users);
-//     }
-//   });
-// });
+router.get('/', function(req, res, next) {
+  var date = new Date();
+  console.log('called route /users for GET' + '\n' + 'date is: ' + date +'/n' + 'with ip = ' + req.ip);
+  fs.appendFile("./log" + date.getDate() + date.getMonth() + ".txt", 'called route /users for GET ' + '\r\n' + 'date is: ' + date +'\r\n' + 'with ip = ' + req.ip, function(err) {});
+  User.find(req.query, function(err, users){
+    if (err) {
+      next(err);
+    } else {
+      res.send(users);
+    }
+  });
+});
 
 router.get('/:id', isSameUser, function(req, res, next) {
   var date = new Date();
